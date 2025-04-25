@@ -1,11 +1,11 @@
 {
-  "name": "doublell",
-  "version": "1.1.6",
-  "description": "A very minimal double linked list",
+  "name": "yasorted-array",
+  "version": "1.0.0",
+  "description": "An efficient sorted array",
   "keywords": [
     "browser",
     "data-structure",
-    "list",
+    "array",
     "node"
   ],
   "main": "./lib/cjs/exports.js",
@@ -16,8 +16,8 @@
     "require": "./lib/cjs/exports.js"
   },
   "types": "./lib/exports.d.ts",
-  "repository": "https://github.com/TypeScript-OSS/doublell.git",
-  "homepage": "https://typescript-oss.github.io/doublell/",
+  "repository": "https://github.com/TypeScript-OSS/yasorted-array.git",
+  "homepage": "https://typescript-oss.github.io/yasorted-array/",
   "license": "MIT",
   "private": false,
   "scripts": {

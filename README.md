@@ -1,9 +1,9 @@
-# doublell
+# yasorted-array
 
 [![Downloads][downloads-badge]][downloads]
 [![Size][size-badge]][size]
 
-A very minimal Double Linked List implementation for browsers and Node.
+An efficient sorted array.
 
 Provided as:
 
@@ -13,21 +13,24 @@ Provided as:
 ## Usage Examples
 
 ```typescript
-const list = new DoubleLinkedList<number>();
-const node1 = list.append(1);
-const node0 = list.prepend(0);
-const node0_5 = list.insertBeforeNode(node1, 0.5);
-const node1_5 = list.insertAfterNode(node1, 1.5);
-console.log(list.getLength());
-console.log(list.getHead()?.value);
-console.log(list.getTail()?.value);
-console.log(node0.nextNode?.value);
-console.log(node1.previousNode?.value);
-list.remove(node0);
-list.clear();
+const numbers = new SortedArray<number>((a,b) => b - a);
+console.log(numbers.add(3)); // 0
+console.log(numbers.add(1)); // 1
+console.log(numbers.add(2)); // 1
+console.log(numbers.firstIndexOf(1)); // 2
+console.log(numbers.firstIndexOf(2)); // 1
+console.log(numbers.firstIndexOf(3)); // 0
+console.log(numbers.firstIndexOf(4)); // -1
+
+for (const element of numbers) {
+  console.log(element)
+} // 3, 2, 1
+
+numbers.removeFirst(2); // 1
+numbers.clear();
 ```
 
-[API Docs](https://typescript-oss.github.io/doublell/)
+[API Docs](https://typescript-oss.github.io/yasorted-array/)
 
 ## Thanks
 
@@ -37,10 +40,10 @@ Be sure to check out our other [TypeScript OSS](https://github.com/TypeScript-OS
 
 <!-- Definitions -->
 
-[downloads-badge]: https://img.shields.io/npm/dm/doublell.svg
+[downloads-badge]: https://img.shields.io/npm/dm/yasorted-array.svg
 
-[downloads]: https://www.npmjs.com/package/doublell
+[downloads]: https://www.npmjs.com/package/yasorted-array
 
-[size-badge]: https://img.shields.io/bundlephobia/minzip/doublell.svg
+[size-badge]: https://img.shields.io/bundlephobia/minzip/yasorted-array.svg
 
-[size]: https://bundlephobia.com/result?p=doublell
+[size]: https://bundlephobia.com/result?p=yasorted-array

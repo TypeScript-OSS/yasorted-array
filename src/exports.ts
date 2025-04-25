@@ -1,1 +1,1 @@
-export * from './DoubleLinkedList/index.js';
+export * from './SortedArray.js';
