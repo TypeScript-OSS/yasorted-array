@@ -135,4 +135,16 @@ describe('SortedArray', () => {
     arr.clear(); // Should not throw on empty array
     expect(arr.length).toBe(0);
   });
+
+  it('should be able to access like array', () => {
+    const arr = new SortedArray<number>((a, b) => b - a);
+    arr.add(1);
+    arr.add(3);
+    arr.add(5);
+
+    expect(arr.length).toBe(3);
+    expect(arr[0]).toBe(5);
+    expect(arr[1]).toBe(3);
+    expect(arr[2]).toBe(1);
+  });
 });

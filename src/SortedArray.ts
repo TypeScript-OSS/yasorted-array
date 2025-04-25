@@ -11,6 +11,19 @@ export class SortedArray<T> implements Iterable<T> {
    */
   constructor(comparator: (a: T, b: T) => number) {
     this.comparator = comparator;
+
+    return new Proxy(this, {
+      get(target, prop, receiver) {
+        if (typeof prop === 'string') {
+          const index = Number(prop);
+          if (!isNaN(index)) {
+            return target.items[index];
+          }
+        }
+
+        return Reflect.get(target, prop, receiver);
+      }
+    });
   }
 
   /** Gets the number of items in the array. */
