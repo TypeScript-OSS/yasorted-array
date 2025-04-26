@@ -1,6 +1,6 @@
 /** SortedArray is a generic class that maintains a sorted array of items. */
 export class SortedArray<T> implements Iterable<T> {
-  private readonly items: T[] = [];
+  private readonly items_: T[] = [];
   private readonly comparator: (a: T, b: T) => number;
 
   /**
@@ -17,7 +17,7 @@ export class SortedArray<T> implements Iterable<T> {
         if (typeof prop === 'string') {
           const index = Number(prop);
           if (!isNaN(index)) {
-            return target.items[index];
+            return target.items_[index];
           }
         }
 
@@ -28,7 +28,7 @@ export class SortedArray<T> implements Iterable<T> {
 
   /** Gets the number of items in the array. */
   get length(): number {
-    return this.items.length;
+    return this.items_.length;
   }
 
   /**
@@ -41,8 +41,62 @@ export class SortedArray<T> implements Iterable<T> {
    */
   add(value: T): number {
     const index = this.findInsertionIndex(value);
-    this.items.splice(index, 0, value);
+    this.items_.splice(index, 0, value);
     return index;
+  }
+
+  /**
+   * Adds multiple values to the sorted array.
+   *
+   * Complexity: O(M * log(n)) for finding insertion points + O(n) for rebuilding the array, where M is the number of items to add.
+   *
+   * @param values - The values to add.
+   * @returns Array of indices, in ascending order, where the values were inserted.
+   */
+  addMultiple(...values: T[]): number[] {
+    if (values.length === 0) {
+      return [];
+    }
+
+    values.sort(this.comparator);
+
+    // Find insertion points for each value (some insertion indices, with respect to the original array, may be the same)
+    const insertionPoints = values
+      .map((value) => ({
+        value,
+        insertionIndex: this.findInsertionIndex(value)
+      }))
+      .reduce((out, { value, insertionIndex }) => {
+        const existing = out.get(insertionIndex);
+        if (existing !== undefined) {
+          existing.push(value);
+        } else {
+          out.set(insertionIndex, [value]);
+        }
+
+        return out;
+      }, new Map<number, T[]>());
+
+    // Rebuilding the array with the new items
+    const insertedIndices: number[] = [];
+    const newItems: T[] = [];
+    const originalLength = this.items_.length;
+    for (let index = 0; index <= originalLength; index += 1) {
+      const toBeInserted = insertionPoints.get(index);
+      if (toBeInserted !== undefined) {
+        for (const value of toBeInserted) {
+          insertedIndices.push(newItems.length);
+          newItems.push(value);
+        }
+      }
+
+      if (index < originalLength) {
+        newItems.push(this.items_[index]);
+      }
+    }
+    this.items_.splice(0, originalLength, ...newItems);
+
+    return insertedIndices;
   }
 
   /**
@@ -56,11 +110,11 @@ export class SortedArray<T> implements Iterable<T> {
   firstIndexOf(value: T): number {
     // Binary search to find an element that matches
     let low = 0;
-    let high = this.items.length - 1;
+    let high = this.items_.length - 1;
 
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
-      const comparison = this.comparator(this.items[mid], value);
+      const comparison = this.comparator(this.items_[mid], value);
 
       if (comparison < 0) {
         low = mid + 1;
@@ -68,7 +122,7 @@ export class SortedArray<T> implements Iterable<T> {
         high = mid - 1;
       } else {
         // Found a match, now find the first occurrence
-        if (mid === 0 || this.comparator(this.items[mid - 1], value) !== 0) {
+        if (mid === 0 || this.comparator(this.items_[mid - 1], value) !== 0) {
           return mid;
         }
         high = mid - 1;
@@ -89,11 +143,11 @@ export class SortedArray<T> implements Iterable<T> {
   lastIndexOf(value: T): number {
     // Binary search to find an element that matches
     let low = 0;
-    let high = this.items.length - 1;
+    let high = this.items_.length - 1;
 
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
-      const comparison = this.comparator(this.items[mid], value);
+      const comparison = this.comparator(this.items_[mid], value);
 
       if (comparison < 0) {
         low = mid + 1;
@@ -101,7 +155,7 @@ export class SortedArray<T> implements Iterable<T> {
         high = mid - 1;
       } else {
         // Found a match, now find the last occurrence
-        if (mid === this.items.length - 1 || this.comparator(this.items[mid + 1], value) !== 0) {
+        if (mid === this.items_.length - 1 || this.comparator(this.items_[mid + 1], value) !== 0) {
           return mid;
         }
         low = mid + 1;
@@ -122,7 +176,7 @@ export class SortedArray<T> implements Iterable<T> {
   removeFirst(value: T): number {
     const index = this.firstIndexOf(value);
     if (index !== -1) {
-      this.items.splice(index, 1);
+      this.items_.splice(index, 1);
     }
     return index;
   }
@@ -138,7 +192,7 @@ export class SortedArray<T> implements Iterable<T> {
   removeLast(value: T): number {
     const index = this.lastIndexOf(value);
     if (index !== -1) {
-      this.items.splice(index, 1);
+      this.items_.splice(index, 1);
     }
     return index;
   }
@@ -166,8 +220,55 @@ export class SortedArray<T> implements Iterable<T> {
       removedIndices.push(i);
     }
 
-    this.items.splice(firstIndex, count);
+    this.items_.splice(firstIndex, count);
     return removedIndices;
+  }
+
+  /**
+   * Removes multiple values from the sorted array.
+   *
+   * If specified values are duplicated in the array, all occurrences are removed.
+   *
+   * Complexity: O(M * log(n)) for finding values + O(n) for rebuilding the array, where M is the number of items to remove.
+   *
+   * @param values - The values to remove.
+   * @returns Array of indices, in descending order, of the items that were removed.
+   */
+  removeMultiple(...values: T[]): number[] {
+    if (values.length === 0) {
+      return [];
+    }
+
+    // Group values by their indices
+    const removeIndices: number[] = [];
+    for (const value of values) {
+      const index = this.firstIndexOf(value);
+      if (index !== -1) {
+        for (let subindex = index; subindex < this.items_.length; subindex += 1) {
+          if (subindex > index && this.comparator(value, this.items_[subindex]) !== 0) {
+            break;
+          }
+
+          removeIndices.push(subindex);
+        }
+      }
+    }
+
+    // Sort indices in ascending order for rebuilding
+    const removeIndicesSet = new Set(removeIndices);
+
+    // Process each group of values
+    const newItems: T[] = [];
+    const originalLength = this.items_.length;
+    for (let index = 0; index < originalLength; index += 1) {
+      if (!removeIndicesSet.has(index)) {
+        newItems.push(this.items_[index]);
+      }
+    }
+    this.items_.splice(0, originalLength, ...newItems);
+
+    // Sort removed indices in descending order
+    return removeIndices.sort((a, b) => b - a);
   }
 
   /**
@@ -176,7 +277,7 @@ export class SortedArray<T> implements Iterable<T> {
    * Complexity: O(1)
    */
   clear(): void {
-    this.items.length = 0;
+    this.items_.length = 0;
   }
 
   /**
@@ -188,14 +289,14 @@ export class SortedArray<T> implements Iterable<T> {
    * @returns The item at the specified index.
    */
   get(index: number): T {
-    return this.items[index];
+    return this.items_[index];
   }
 
   /**
    * Returns an iterator for the array.
    */
   [Symbol.iterator](): Iterator<T> {
-    return this.items[Symbol.iterator]();
+    return this.items_[Symbol.iterator]();
   }
 
   /**
@@ -213,11 +314,11 @@ export class SortedArray<T> implements Iterable<T> {
    */
   private findInsertionIndex(value: T): number {
     let low = 0;
-    let high = this.items.length - 1;
+    let high = this.items_.length - 1;
 
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
-      const comparison = this.comparator(this.items[mid], value);
+      const comparison = this.comparator(this.items_[mid], value);
 
       if (comparison < 0) {
         low = mid + 1;

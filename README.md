@@ -13,6 +13,7 @@ Provided as:
 ## Usage Examples
 
 ```typescript
+// Basics
 const numbers = new SortedArray<number>((a,b) => b - a);
 console.log(numbers.add(3)); // 0
 console.log(numbers.add(1)); // 1
@@ -28,6 +29,20 @@ for (const element of numbers) {
 
 numbers.removeFirst(2); // 1
 numbers.clear();
+
+// Add Multiple
+console.log(numbers.addMultiple(3, 1, 2)); // [0, 1, 2]
+console.log(numbers.firstIndexOf(1)); // 2
+console.log(numbers.firstIndexOf(2)); // 1
+console.log(numbers.firstIndexOf(3)); // 0
+console.log(Array.from(numbers)); // [3, 2, 1]
+
+console.log(numbers.addMultiple(0, 0.5, 1.5, 2.5, 3.5)); // [0, 2, 4, 6, 7]
+console.log(Array.from(numbers)); // [3.5, 3, 2.5, 2, 1.5, 1, 0.5, 0]
+
+// Remove Multiple
+console.log(numbers.removeMultiple(0, 2)); // [7, 3]
+console.log(Array.from(numbers)); // [3.5, 3, 2.5, 1.5, 1, 0.5]
 ```
 
 [API Docs](https://typescript-oss.github.io/yasorted-array/)
