@@ -211,17 +211,20 @@ export class SortedArray<T> implements Iterable<T> {
       return [];
     }
 
-    const lastIndex = this.lastIndexOf(value);
-    const count = lastIndex - firstIndex + 1;
-    const removedIndices: number[] = [];
+    let count = 0;
+    const removeIndices: number[] = [];
+    // Mark all of the same values for removal
+    for (let subindex = firstIndex; subindex < this.items_.length; subindex += 1) {
+      if (subindex > firstIndex && this.comparator(value, this.items_[subindex]) !== 0) {
+        break;
+      }
 
-    // Add indices in reverse order
-    for (let i = lastIndex; i >= firstIndex; i -= 1) {
-      removedIndices.push(i);
+      count += 1;
+      removeIndices.push(subindex);
     }
 
     this.items_.splice(firstIndex, count);
-    return removedIndices;
+    return removeIndices.sort((a, b) => b - a);
   }
 
   /**
@@ -239,11 +242,11 @@ export class SortedArray<T> implements Iterable<T> {
       return [];
     }
 
-    // Group values by their indices
     const removeIndices: number[] = [];
     for (const value of values) {
       const index = this.firstIndexOf(value);
       if (index !== -1) {
+        // Mark all of the same values for removal
         for (let subindex = index; subindex < this.items_.length; subindex += 1) {
           if (subindex > index && this.comparator(value, this.items_[subindex]) !== 0) {
             break;
