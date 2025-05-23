@@ -1,5 +1,7 @@
+import type { ISortedArray } from './ISortedArray.js';
+
 /** SortedArray is a generic class that maintains a sorted array of items. */
-export class SortedArray<T> implements Iterable<T> {
+export class SortedArray<T> implements ISortedArray<T> {
   private readonly items_: T[] = [];
   private readonly comparator: (a: T, b: T) => number;
 
@@ -27,7 +29,7 @@ export class SortedArray<T> implements Iterable<T> {
   }
 
   /** Gets the number of items in the array. */
-  get length(): number {
+  public get length(): number {
     return this.items_.length;
   }
 
@@ -39,7 +41,7 @@ export class SortedArray<T> implements Iterable<T> {
    * @param value - The value to add.
    * @returns The index at which the value was inserted.
    */
-  add(value: T): number {
+  public add(value: T): number {
     const index = this.findInsertionIndex(value);
     this.items_.splice(index, 0, value);
     return index;
@@ -53,7 +55,7 @@ export class SortedArray<T> implements Iterable<T> {
    * @param values - The values to add.
    * @returns Array of indices, in ascending order, where the values were inserted.
    */
-  addMultiple(...values: T[]): number[] {
+  public addMultiple(...values: T[]): number[] {
     if (values.length === 0) {
       return [];
     }
@@ -107,7 +109,7 @@ export class SortedArray<T> implements Iterable<T> {
    * @param value - The value to find.
    * @returns The index of the first matching element, or `-1` if not found.
    */
-  firstIndexOf(value: T): number {
+  public firstIndexOf(value: T): number {
     // Binary search to find an element that matches
     let low = 0;
     let high = this.items_.length - 1;
@@ -140,7 +142,7 @@ export class SortedArray<T> implements Iterable<T> {
    * @param value - The value to find.
    * @returns The index of the last matching element, or `-1` if not found.
    */
-  lastIndexOf(value: T): number {
+  public lastIndexOf(value: T): number {
     // Binary search to find an element that matches
     let low = 0;
     let high = this.items_.length - 1;
@@ -166,6 +168,23 @@ export class SortedArray<T> implements Iterable<T> {
   }
 
   /**
+   * Removes the element at the specified index.
+   *
+   * Complexity: O(n) for removal
+   *
+   * @param value - The value to remove.
+   * @returns The index of the removed element, or `-1` if invalid (non-integer) or out of bounds.
+   */
+  public removeAtIndex(index: number): number {
+    if (!Number.isInteger(index) || index < 0 || index >= this.items_.length) {
+      return -1;
+    }
+
+    this.items_.splice(index, 1);
+    return index;
+  }
+
+  /**
    * Removes the first element that matches the provided value.
    *
    * Complexity: O(log(n)) for search + O(n) for removal
@@ -173,12 +192,8 @@ export class SortedArray<T> implements Iterable<T> {
    * @param value - The value to remove.
    * @returns The former index of the removed element, or `-1` if not found.
    */
-  removeFirst(value: T): number {
-    const index = this.firstIndexOf(value);
-    if (index !== -1) {
-      this.items_.splice(index, 1);
-    }
-    return index;
+  public removeFirst(value: T): number {
+    return this.removeAtIndex(this.firstIndexOf(value));
   }
 
   /**
@@ -189,12 +204,8 @@ export class SortedArray<T> implements Iterable<T> {
    * @param value - The value to remove.
    * @returns The former index of the removed element, or `-1` if not found.
    */
-  removeLast(value: T): number {
-    const index = this.lastIndexOf(value);
-    if (index !== -1) {
-      this.items_.splice(index, 1);
-    }
-    return index;
+  public removeLast(value: T): number {
+    return this.removeAtIndex(this.lastIndexOf(value));
   }
 
   /**
@@ -205,7 +216,7 @@ export class SortedArray<T> implements Iterable<T> {
    * @param value - The value to remove.
    * @returns Array of former indices of the removed elements (in reverse order).
    */
-  removeAll(value: T): number[] {
+  public removeAll(value: T): number[] {
     const firstIndex = this.firstIndexOf(value);
     if (firstIndex === -1) {
       return [];
@@ -237,7 +248,7 @@ export class SortedArray<T> implements Iterable<T> {
    * @param values - The values to remove.
    * @returns Array of indices, in descending order, of the items that were removed.
    */
-  removeMultiple(...values: T[]): number[] {
+  public removeMultiple(...values: T[]): number[] {
     if (values.length === 0) {
       return [];
     }
@@ -279,7 +290,7 @@ export class SortedArray<T> implements Iterable<T> {
    *
    * Complexity: O(1)
    */
-  clear(): void {
+  public clear(): void {
     this.items_.length = 0;
   }
 
@@ -291,9 +302,11 @@ export class SortedArray<T> implements Iterable<T> {
    * @param index - The index to access.
    * @returns The item at the specified index.
    */
-  get(index: number): T {
+  public get(index: number): T {
     return this.items_[index];
   }
+
+  // Iterable Methods
 
   /**
    * Returns an iterator for the array.
@@ -306,6 +319,8 @@ export class SortedArray<T> implements Iterable<T> {
    * Allows array-like indexing.
    */
   [index: number]: T;
+
+  // Private Methods
 
   /**
    * Helper method to find the index where a new value should be inserted.
