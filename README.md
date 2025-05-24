@@ -105,6 +105,16 @@ export interface ISortedArray<T> extends Iterable<T> {
   removeAtIndex(index: number): number;
 
   /**
+   * Removes the elements at the specified indices.
+   *
+   * Complexity: O(n) for rebuilding the array
+   *
+   * @param indices - The indices of the elements to remove.
+   * @returns Array of former indices of the removed elements (in reverse order).
+   */
+  removeAtIndices(...indices: number[]): number[];
+  
+  /**
    * Removes the first element that matches the provided value.
    *
    * Complexity: O(log(n)) for search + O(n) for removal

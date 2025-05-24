@@ -9,7 +9,7 @@ export class SortedArray<T> implements ISortedArray<T> {
    * Creates a new SortedArray.
    *
    * @param comparator - Function to compare two items. Should return a negative number if a &lt; b, zero if a === b, or a positive number
-   * if a &gt; b.
+   * if a &gt; b.  Comparisons are assumed to be consistent.
    */
   constructor(comparator: (a: T, b: T) => number) {
     this.comparator = comparator;
@@ -172,7 +172,7 @@ export class SortedArray<T> implements ISortedArray<T> {
    *
    * Complexity: O(n) for removal
    *
-   * @param value - The value to remove.
+   * @param index - The index of the element to remove.
    * @returns The index of the removed element, or `-1` if invalid (non-integer) or out of bounds.
    */
   public removeAtIndex(index: number): number {
@@ -182,6 +182,32 @@ export class SortedArray<T> implements ISortedArray<T> {
 
     this.items_.splice(index, 1);
     return index;
+  }
+
+  /**
+   * Removes the elements at the specified indices.
+   *
+   * Complexity: O(n) for rebuilding the array
+   *
+   * @param indices - The indices of the elements to remove.
+   * @returns Array of former indices of the removed elements (in reverse order).
+   */
+  public removeAtIndices(...indices: number[]): number[] {
+    const indicesSet = new Set(indices);
+
+    const newItems: T[] = [];
+    const removeIndices: number[] = [];
+    for (let subindex = 0; subindex < this.items_.length; subindex += 1) {
+      if (indicesSet.has(subindex)) {
+        removeIndices.push(subindex);
+      } else {
+        newItems.push(this.items_[subindex]);
+      }
+    }
+
+    this.items_.splice(0, this.items_.length, ...newItems);
+
+    return removeIndices.reverse();
   }
 
   /**
@@ -235,7 +261,8 @@ export class SortedArray<T> implements ISortedArray<T> {
     }
 
     this.items_.splice(firstIndex, count);
-    return removeIndices.sort((a, b) => b - a);
+
+    return removeIndices.reverse();
   }
 
   /**
@@ -268,21 +295,7 @@ export class SortedArray<T> implements ISortedArray<T> {
       }
     }
 
-    // Sort indices in ascending order for rebuilding
-    const removeIndicesSet = new Set(removeIndices);
-
-    // Process each group of values
-    const newItems: T[] = [];
-    const originalLength = this.items_.length;
-    for (let index = 0; index < originalLength; index += 1) {
-      if (!removeIndicesSet.has(index)) {
-        newItems.push(this.items_[index]);
-      }
-    }
-    this.items_.splice(0, originalLength, ...newItems);
-
-    // Sort removed indices in descending order
-    return removeIndices.sort((a, b) => b - a);
+    return this.removeAtIndices(...removeIndices);
   }
 
   /**

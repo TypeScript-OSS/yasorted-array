@@ -78,6 +78,20 @@ describe('SortedArray', () => {
     expect(arr.removeAtIndex(NaN)).toBe(-1);
   });
 
+  it('remove multiple items at specified indices correctly', () => {
+    const arr = new SortedArray<number>((a, b) => a - b);
+    arr.add(1);
+    arr.add(3);
+    arr.add(3);
+    arr.add(3);
+    arr.add(5);
+
+    expect(arr.removeAtIndices(1, 2)).toMatchObject([2, 1]);
+    expect(Array.from(arr)).toEqual([1, 3, 5]);
+
+    expect(arr.removeAtIndices(-1, 3.14, 10, NaN)).toMatchObject([]);
+  });
+
   it('removes first and last occurrences correctly', () => {
     const arr = new SortedArray<number>((a, b) => a - b);
     arr.add(1);
