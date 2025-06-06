@@ -316,4 +316,167 @@ describe('SortedArray', () => {
       expect(Array.from(people)).toEqual([charlie, bob]);
     });
   });
+
+  describe('filtering', () => {
+    it('should filter elements correctly', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+      const evenNumbers = arr.filter((n) => n % 2 === 0);
+
+      expect(evenNumbers.length).toBe(5);
+      expect(Array.from(evenNumbers)).toEqual([2, 4, 6, 8, 10]);
+    });
+
+    it('should maintain the original sort order after filtering', () => {
+      // Descending order
+      const arr = new SortedArray<number>((a, b) => b - a);
+      arr.addMultiple(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+      const evenNumbers = arr.filter((n) => n % 2 === 0);
+
+      // Should still be in descending order
+      expect(Array.from(evenNumbers)).toEqual([10, 8, 6, 4, 2]);
+    });
+
+    it('should return an empty array when no elements match', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(1, 2, 3, 4, 5);
+
+      const filtered = arr.filter((n) => n > 10);
+
+      expect(filtered.length).toBe(0);
+      expect(Array.from(filtered)).toEqual([]);
+    });
+
+    it('should return a new array with all elements when all match', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(1, 2, 3, 4, 5);
+
+      const filtered = arr.filter(() => true);
+
+      expect(filtered.length).toBe(5);
+      expect(Array.from(filtered)).toEqual([1, 2, 3, 4, 5]);
+      expect(filtered).not.toBe(arr); // Should be a new instance
+    });
+
+    it('should work with custom objects', () => {
+      interface Person {
+        name: string;
+        age: number;
+      }
+
+      const people = new SortedArray<Person>((a, b) => a.age - b.age);
+      const alice = { name: 'Alice', age: 25 };
+      const bob = { name: 'Bob', age: 30 };
+      const charlie = { name: 'Charlie', age: 20 };
+      const david = { name: 'David', age: 35 };
+
+      people.addMultiple(alice, bob, charlie, david);
+
+      const adults = people.filter((p) => p.age >= 25);
+
+      expect(adults.length).toBe(3);
+      expect(Array.from(adults)).toEqual([alice, bob, david]);
+    });
+
+    it('should provide correct indices and array to predicate', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(10, 20, 30);
+
+      const calls: Array<[number, number, Readonly<number[]>]> = [];
+
+      arr.filter((value, index, array) => {
+        calls.push([value, index, array]);
+        return false;
+      });
+
+      expect(calls.length).toBe(3);
+      expect(calls[0][0]).toBe(10);
+      expect(calls[0][1]).toBe(0);
+      expect(calls[1][0]).toBe(20);
+      expect(calls[1][1]).toBe(1);
+      expect(calls[2][0]).toBe(30);
+      expect(calls[2][1]).toBe(2);
+    });
+  });
+
+  describe('finding indices', () => {
+    it('should find index correctly using predicate', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(1, 3, 5, 7, 9);
+
+      const index = arr.findIndex((item) => item > 4);
+      expect(index).toBe(2); // index of 5
+
+      const noMatch = arr.findIndex((item) => item > 10);
+      expect(noMatch).toBe(-1);
+    });
+
+    it('should find last index correctly using predicate', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(1, 3, 5, 7, 9);
+
+      const index = arr.findLastIndex((item) => item < 6);
+      expect(index).toBe(2); // index of 5
+
+      const noMatch = arr.findLastIndex((item) => item < 0);
+      expect(noMatch).toBe(-1);
+    });
+
+    it('should find all indices correctly using predicate', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+      const indices = arr.findIndices((item) => item % 2 === 0);
+      expect(indices).toEqual([1, 3, 5, 7]); // indices of 2, 4, 6, 8
+
+      const noMatches = arr.findIndices((item) => item > 10);
+      expect(noMatches).toEqual([]);
+    });
+
+    it('should provide correct element indices and array to predicate', () => {
+      const arr = new SortedArray<number>((a, b) => a - b);
+      arr.addMultiple(10, 20, 30);
+
+      const calls: Array<[number, number, Readonly<number[]>]> = [];
+
+      arr.findIndex((value, index, array) => {
+        calls.push([value, index, array]);
+        return false;
+      });
+
+      expect(calls.length).toBe(3);
+      expect(calls[0][0]).toBe(10);
+      expect(calls[0][1]).toBe(0);
+      expect(calls[1][0]).toBe(20);
+      expect(calls[1][1]).toBe(1);
+      expect(calls[2][0]).toBe(30);
+      expect(calls[2][1]).toBe(2);
+    });
+
+    it('should work with object arrays', () => {
+      interface Person {
+        name: string;
+        age: number;
+      }
+
+      const people = new SortedArray<Person>((a, b) => a.age - b.age);
+      const alice = { name: 'Alice', age: 25 };
+      const bob = { name: 'Bob', age: 30 };
+      const charlie = { name: 'Charlie', age: 20 };
+      const david = { name: 'David', age: 35 };
+
+      people.addMultiple(alice, bob, charlie, david);
+
+      const youngPerson = people.findIndex((p) => p.age < 25);
+      expect(youngPerson).toBe(0); // charlie
+
+      const oldPersonLast = people.findLastIndex((p) => p.age > 25);
+      expect(oldPersonLast).toBe(3); // david
+
+      const middleAgedPeople = people.findIndices((p) => p.age >= 25 && p.age < 35);
+      expect(middleAgedPeople).toEqual([1, 2]); // alice and bob
+    });
+  });
 });

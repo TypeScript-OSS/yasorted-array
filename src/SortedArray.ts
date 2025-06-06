@@ -319,6 +319,70 @@ export class SortedArray<T> implements ISortedArray<T> {
     return this.items_[index];
   }
 
+  /**
+   * Creates a new `ISortedArray` by filtering the elements of this array using the specified predicate.
+   *
+   * Complexity: O(n) for filtering.  No sort comparison are performed since it's assumed all elements will be in the same relative order.
+   *
+   * @param predicate - The function used to test each element.
+   * @returns A new `ISortedArray` containing the elements that match the predicate.
+   */
+  public filter(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): ISortedArray<T> {
+    const newArray = new SortedArray<T>(this.comparator);
+    newArray.items_.push(...this.items_.filter(predicate));
+    return newArray;
+  }
+
+  /**
+   * Finds the first index of an element that matches using the specified predicate.
+   *
+   * Complexity: O(n) for search
+   *
+   * @param predicate - The function to test each element.
+   * @returns The index of the first matching element, which will be `-1` if not found.
+   */
+  public findIndex(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): number {
+    return this.items_.findIndex(predicate);
+  }
+
+  /**
+   * Finds the last index of an element that matches using the specified predicate.
+   *
+   * Complexity: O(n) for search
+   *
+   * @param predicate - The function to test each element.
+   * @returns The index of the last matching element, which will be `-1` if not found.
+   */
+  public findLastIndex(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): number {
+    for (let index = this.items_.length - 1; index >= 0; index -= 1) {
+      if (predicate(this.items_[index], index, this.items_)) {
+        return index;
+      }
+    }
+
+    return -1;
+  }
+
+  /**
+   * Finds all indices of elements that match using the specified predicate.
+   *
+   * Complexity: O(n) for search
+   *
+   * @param predicate - The function to test each element.
+   * @returns The indices of the matching elements, in ascending order, which will be empty if no matches are found.
+   */
+  public findIndices(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): number[] {
+    const indices: number[] = [];
+
+    for (let index = 0; index < this.items_.length; index += 1) {
+      if (predicate(this.items_[index], index, this.items_)) {
+        indices.push(index);
+      }
+    }
+
+    return indices;
+  }
+
   // Iterable Methods
 
   /**

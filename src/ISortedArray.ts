@@ -120,4 +120,44 @@ export interface ISortedArray<T> extends Iterable<T> {
    * @returns The item at the specified index.
    */
   get(index: number): T;
+
+  /**
+   * Creates a new `ISortedArray` by filtering the elements of this array using the specified predicate.
+   *
+   * Complexity: O(n) for filtering.  No sort comparison are performed since it's assumed all elements will be in the same relative order.
+   *
+   * @param predicate - The function used to test each element.
+   * @returns A new `ISortedArray` containing the elements that match the predicate.
+   */
+  filter(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): ISortedArray<T>;
+
+  /**
+   * Finds the first index of an element that matches using the specified predicate.
+   *
+   * Complexity: O(n) for search
+   *
+   * @param predicate - The function to test each element.
+   * @returns The index of the first matching element, which will be `-1` if not found.
+   */
+  findIndex(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): number;
+
+  /**
+   * Finds the last index of an element that matches using the specified predicate.
+   *
+   * Complexity: O(n) for search
+   *
+   * @param predicate - The function to test each element.
+   * @returns The index of the last matching element, which will be `-1` if not found.
+   */
+  findLastIndex(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): number;
+
+  /**
+   * Finds all indices of elements that match using the specified predicate.
+   *
+   * Complexity: O(n) for search
+   *
+   * @param predicate - The function to test each element.
+   * @returns The indices of the matching elements, in ascending order, which will be empty if no matches are found.
+   */
+  findIndices(predicate: (value: T, index: number, obj: Readonly<T[]>) => boolean): number[];
 }
